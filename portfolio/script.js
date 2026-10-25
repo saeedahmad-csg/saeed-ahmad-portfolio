@@ -213,4 +213,44 @@
     mqt.addEventListener('mouseleave', () => mqt.style.animationPlayState = '');
   }
 
+  /* ── Contact Form (AJAX submission) ──────────────────────── */
+  const contactForm = document.getElementById('contact-form');
+  const formStatus  = document.getElementById('form-status');
+  const submitBtn   = document.getElementById('form-submit-btn');
+
+  if (contactForm && formStatus && submitBtn) {
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const originalBtnHTML = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Sending Inquiry...</span><i>⏳</i>';
+      formStatus.className = 'form-status';
+      formStatus.style.display = 'none';
+
+      try {
+        const formData = new FormData(contactForm);
+        const response = await fetch(contactForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          formStatus.className = 'form-status success';
+          formStatus.textContent = 'Thank you! Your project inquiry has been sent to Saeed Ahmad. I will review your requirements and respond shortly.';
+          contactForm.reset();
+        } else {
+          throw new Error('Network response not ok');
+        }
+      } catch (err) {
+        formStatus.className = 'form-status error';
+        formStatus.innerHTML = 'Could not send right now. Please reach out directly on <a href="https://wa.me/923448725255" target="_blank" rel="noopener" style="text-decoration:underline;color:inherit;font-weight:700;">WhatsApp</a>.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+      }
+    });
+  }
+
 })();
