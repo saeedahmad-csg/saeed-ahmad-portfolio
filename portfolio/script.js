@@ -66,26 +66,26 @@
   /* ── Reveal on scroll (IntersectionObserver) ─────────────── */
   const reveals = document.querySelectorAll('[data-reveal]');
   const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        // stagger siblings
         const siblings = entry.target.parentElement
           ? [...entry.target.parentElement.querySelectorAll('[data-reveal]')]
           : [];
         const idx = siblings.indexOf(entry.target);
+        const delay = Math.min(idx * 80, 400);
         setTimeout(() => {
           entry.target.classList.add('visible');
-        }, idx * 80);
+        }, delay);
         revealObs.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
   reveals.forEach(el => revealObs.observe(el));
 
   /* ── Hero headline word-by-word reveal ───────────────────── */
   const heroWords = document.querySelectorAll('.hero-h .w');
   heroWords.forEach((w, i) => {
-    setTimeout(() => w.classList.add('in'), 700 + i * 160);
+    setTimeout(() => w.classList.add('in'), 500 + i * 150);
   });
 
   /* ── Animated typing bot messages ───────────────────────── */
@@ -142,12 +142,12 @@
             div.className = `msg bot-msg`;
             div.innerHTML = `<span>${msg.text}</span>`;
             div.style.opacity = '0';
-            div.style.transform = 'translateY(6px)';
-            div.style.transition = 'opacity .3s, transform .3s';
+            div.style.transform = 'translateY(8px) scale(0.96)';
+            div.style.transition = 'opacity .35s cubic-bezier(.16,1,.3,1), transform .35s cubic-bezier(.16,1,.3,1)';
             botBody.appendChild(div);
             requestAnimationFrame(() => {
               div.style.opacity = '1';
-              div.style.transform = 'translateY(0)';
+              div.style.transform = 'translateY(0) scale(1)';
             });
           }, delay);
         } else {
@@ -157,18 +157,18 @@
             div.className = `msg user-msg`;
             div.innerHTML = `<span>${msg.text}</span>`;
             div.style.opacity = '0';
-            div.style.transform = 'translateY(6px)';
-            div.style.transition = 'opacity .3s, transform .3s';
+            div.style.transform = 'translateY(8px) scale(0.96)';
+            div.style.transition = 'opacity .35s cubic-bezier(.16,1,.3,1), transform .35s cubic-bezier(.16,1,.3,1)';
             botBody.appendChild(div);
             requestAnimationFrame(() => {
               div.style.opacity = '1';
-              div.style.transform = 'translateY(0)';
+              div.style.transform = 'translateY(0) scale(1)';
             });
           }, delay);
         }
 
         if (isLast) {
-          delay += 2400;
+          delay += 2600;
           setTimeout(() => {
             convIdx = (convIdx + 1) % conversations.length;
             renderConversation(conversations[convIdx]);
@@ -178,34 +178,33 @@
     }
 
     // start after loader fades
-    setTimeout(() => renderConversation(conversations[0]), 1400);
+    setTimeout(() => renderConversation(conversations[0]), 1200);
   })();
 
-  /* ── Skill cards tilt on hover ───────────────────────────── */
-  document.querySelectorAll('.skill-card').forEach(card => {
+  /* ── Tilt with smooth interpolation ──────────────────────── */
+  function applyTilt(card, maxRotate) {
+    let ticking = false;
     card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width  - .5;
-      const y = (e.clientY - rect.top)  / rect.height - .5;
-      card.style.transform = `translateY(-6px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width  - .5;
+          const y = (e.clientY - rect.top)  / rect.height - .5;
+          card.style.transition = 'transform .15s ease-out, box-shadow .35s cubic-bezier(.16,1,.3,1)';
+          card.style.transform = `translateY(-8px) rotateX(${-y * maxRotate}deg) rotateY(${x * maxRotate}deg)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
     card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform .45s cubic-bezier(.16,1,.3,1), box-shadow .45s cubic-bezier(.16,1,.3,1)';
       card.style.transform = '';
     });
-  });
+  }
 
-  /* ── Project cards tilt ──────────────────────────────────── */
-  document.querySelectorAll('.proj-card:not(.featured)').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width  - .5;
-      const y = (e.clientY - rect.top)  / rect.height - .5;
-      card.style.transform = `translateY(-6px) rotateX(${-y * 4}deg) rotateY(${x * 4}deg)`;
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-    });
-  });
+  document.querySelectorAll('.skill-card').forEach(card => applyTilt(card, 6));
+  document.querySelectorAll('.proj-card:not(.featured)').forEach(card => applyTilt(card, 5));
 
   /* ── Marquee: pause on hover ─────────────────────────────── */
   const mqt = document.querySelector('.mq-t');
