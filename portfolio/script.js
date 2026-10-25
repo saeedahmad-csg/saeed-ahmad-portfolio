@@ -92,19 +92,24 @@
   (function botAnimation() {
     const conversations = [
       [
-        { type: 'bot',  text: 'Hi! I qualify your leads 24/7. What\'s your budget?' },
-        { type: 'user', text: 'Around $500–$2000/month' },
-        { type: 'bot',  text: 'Perfect! You\'re a great fit. Let me connect you now.' },
+        { type: 'bot',  text: 'Hi! I\'m an AI System. What do you need automated?' },
+        { type: 'user', text: 'Lead qualification & follow-ups' },
+        { type: 'bot',  text: 'On it! I\'ll build an agent pipeline for that. 🚀' },
       ],
       [
-        { type: 'bot',  text: 'Do you need a WhatsApp bot or a website chatbot?' },
-        { type: 'user', text: 'Both, actually' },
-        { type: 'bot',  text: 'Great! I can set up both with full CRM integration.' },
+        { type: 'bot',  text: 'Do you need a WhatsApp agent or a web AI system?' },
+        { type: 'user', text: 'Both, with CRM sync' },
+        { type: 'bot',  text: 'Perfect — multi-agent setup with full CRM integration!' },
       ],
       [
         { type: 'bot',  text: 'How many leads do you receive per month?' },
         { type: 'user', text: 'About 200–300' },
-        { type: 'bot',  text: '100% automation is possible. Let\'s build your system!' },
+        { type: 'bot',  text: 'I can automate 100% of that. Let\'s build your AI System!' },
+      ],
+      [
+        { type: 'bot',  text: 'Want an AI agent that searches, reasons & acts?' },
+        { type: 'user', text: 'Yes — fully autonomous!' },
+        { type: 'bot',  text: 'Let\'s deploy a LangChain agent with tool-calling. ⚡' },
       ],
     ];
 
