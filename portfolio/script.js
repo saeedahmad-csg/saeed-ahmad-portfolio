@@ -245,12 +245,88 @@
         }
       } catch (err) {
         formStatus.className = 'form-status error';
-        formStatus.innerHTML = 'Could not send right now. Please reach out directly on <a href="https://wa.me/923448725255" target="_blank" rel="noopener" style="text-decoration:underline;color:inherit;font-weight:700;">WhatsApp</a>.';
+        formStatus.textContent = 'Could not send right now. Please try again or refresh the page.';
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHTML;
       }
     });
+  }
+
+  /* ── Interactive Spotlight (cursor glow tracking) ────────── */
+  let mouseFrame;
+  window.addEventListener('mousemove', (e) => {
+    if (mouseFrame) cancelAnimationFrame(mouseFrame);
+    mouseFrame = requestAnimationFrame(() => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    });
+  }, { passive: true });
+
+  /* ── 3D Card Tilt on Hover ───────────────────────────────── */
+  const tiltCards = document.querySelectorAll('.proj-card, .contact-fast-card');
+  tiltCards.forEach(card => {
+    let cardBounds;
+
+    card.addEventListener('mouseenter', () => {
+      cardBounds = card.getBoundingClientRect();
+    });
+
+    card.addEventListener('mousemove', (e) => {
+      if (!cardBounds) cardBounds = card.getBoundingClientRect();
+      const x = e.clientX - cardBounds.left;
+      const y = e.clientY - cardBounds.top;
+      const centerX = cardBounds.width / 2;
+      const centerY = cardBounds.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -5;
+      const rotateY = ((x - centerX) / centerX) * 5;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      cardBounds = null;
+    });
+  });
+
+  /* ── Smooth Number Counter on Scroll ─────────────────────── */
+  const counterElements = document.querySelectorAll('[data-counter]');
+  if ('IntersectionObserver' in window && counterElements.length > 0) {
+    const counterObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        observer.unobserve(el);
+
+        const target = parseFloat(el.getAttribute('data-counter')) || 0;
+        const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+        const prefix = el.getAttribute('data-prefix') || '';
+        const suffix = el.getAttribute('data-suffix') || '';
+        const duration = 1400; // ms
+        const startTime = performance.now();
+
+        function updateCounter(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic: 1 - pow(1 - progress, 3)
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          const currentVal = (target * easeProgress).toFixed(decimals);
+
+          el.textContent = `${prefix}${currentVal}${suffix}`;
+
+          if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+          } else {
+            el.textContent = `${prefix}${target.toFixed(decimals)}${suffix}`;
+          }
+        }
+
+        requestAnimationFrame(updateCounter);
+      });
+    }, { threshold: 0.3 });
+
+    counterElements.forEach(el => counterObserver.observe(el));
   }
 
 })();
